@@ -32,6 +32,12 @@ more than 300 iterations to escape it is assumed that is does not escape to infi
 Whilst not totally accurate this allows for much faster rendering and only presents
 an issue when very fine levels of detail are examined.
 
+\section*{How to use}
+Simply run mandelbrot from the command line and follow the instructions. A generated
+mandelbrot.pnm file will appear in the same directory. If you wish to save one of
+the mandelbrot images you should move it before re-running the program or it will
+be overwritten.
+
 \section*{Implementation}
 
 Firstly the Pnm module (which provides rendering functionality for a list of \texttt{Rgb} values)
