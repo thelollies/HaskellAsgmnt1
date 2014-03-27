@@ -70,7 +70,7 @@ it will throw an "Empty List" exception.
 \begin{code}
 myLast :: [a] -> a
 myLast [] = error "Empty List"
-myLast x = x !! ((length x) - 1)
+myLast (x:xs) = foldl (\ _ b -> b) x xs
 \end{code}
 
 \noindent \texttt{myUnzip} accepts a list of pairs and returns a pair of lists such that the
@@ -101,7 +101,7 @@ function which maps a \texttt{Char} to its scrabble value
 
 \begin{code}
 scrabblify :: String -> Int
-scrabblify x = mySum $ map scrabLetter x
+scrabblify x = foldr ((+) . scrabLetter) 0 x
 
 scrabLetter :: Char -> Int
 scrabLetter x | myContains "aAeEiIlLnNoOrRsStTuU" x = 1
