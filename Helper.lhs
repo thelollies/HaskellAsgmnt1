@@ -14,8 +14,9 @@ module Helper where
 
 \section*{Core}
 \texttt{myContains} accepts an element and a list of the same type and returns
-\texttt{True} if the element is in the list and False otherwise. The type of the element 
-and list must implement \texttt{Eq}.
+\texttt{True} if the element is in the list and False otherwise. It achieves this
+via foldr which allows myContains to terminate even on an infinite list (the
+optimiser will realise that once a true value is found it can end evaluation). \texttt{Eq}.
 
 \begin{code}
 myContains :: Eq a => [a] -> a -> Bool
@@ -23,7 +24,8 @@ myContains x y = foldr (\ x0 y0 -> y0 || (x0 == y)) False x
 \end{code}
 
 \noindent \texttt{mySum} accepts a list of elements (which must be a subtype of \texttt{Num}) and
-returns the sum of all the elements in the list using foldr.
+returns the sum of all the elements in the list using foldr. It will never terminate on an infinite
+list as every element in an infinite list must be evaluated.
 
 \begin{code}
 mySum :: Num a => [a] -> a
@@ -31,7 +33,8 @@ mySum x = foldr (+) 0 x
 \end{code}
 
 \noindent \texttt{mySort} accepts a list of elements which are a subtype of \texttt{Ord} and returns
-that list in ascending order. It uses recursive mergesort to achieve the sorting.
+that list in ascending order. It uses recursive mergesort to achieve the sorting. \texttt{merge} is a helper
+function which merges two ordered lists.
 
 \begin{code}
 mySort :: Ord a => [a] -> [a]
@@ -50,10 +53,9 @@ merge (x:xrest) (y:yrest) | otherwise = y: merge (x:xrest) yrest
 
 \noindent \texttt{myFilter} accepts a function and a list and returns a new list containing
 all of the elements which evaluate to \texttt{True} when the provided function is
-applied to them (order is maintained). The provided function must accept an element of the provided
-list and return a \texttt{Bool}. \texttt{evaluateElem} is a helper function which takes a 
-function, an element and a list and appends the element to the list if the function returns
-true for the given element.
+applied to them. foldr was used to maintain ordering and to allow handling of infinite lists.
+\texttt{evaluateElem} is a helper function which takes a function, an element and a list and 
+appends the element to the list if the function returns true for the given element.
 
 \begin{code}
 myFilter :: (a -> Bool) -> [a] -> [a]
@@ -65,7 +67,8 @@ evaluateElem f e list | f e == True = e:list
 \end{code}
 
 \noindent \texttt{myLast} returns the last element of a list. If the provided list is empty
-it will throw an "Empty List" exception.
+it will throw an "Empty List" exception. It works by folding from the left of a list and
+always carrying the last element evaluated.
 
 \begin{code}
 myLast :: [a] -> a
@@ -75,7 +78,8 @@ myLast (x:xs) = foldl (\ _ b -> b) x xs
 
 \noindent \texttt{myUnzip} accepts a list of pairs and returns a pair of lists such that the
 first element of every pair is in the first list and the second element of
-every pair is in the second list. Ordering is maintained.
+every pair is in the second list. Ordering is maintained (the reason for choosing foldr) and
+infinite lists can be handled.
 
 \begin{code}
 myUnzip :: [(a, b)] -> ([a],[b])
@@ -95,15 +99,15 @@ powerSet [] = [[]]
 powerSet (x:xs) = powerSet xs ++ map (x:) (powerSet xs)
 \end{code}
 
-\noindent \texttt{scrabblify} accepts a string and returns an Int which is the score that the provided
+\noindent \texttt{scrabblify} accepts a string and returns a Num which is the score that the provided
 string would earn if played in scrabble (without bonus tiles). \texttt{scrabLetter} is a helper
 function which maps a \texttt{Char} to its scrabble value
 
 \begin{code}
-scrabblify :: String -> Int
+scrabblify :: Num a => String -> a
 scrabblify x = foldr ((+) . scrabLetter) 0 x
 
-scrabLetter :: Char -> Int
+scrabLetter :: Num a => Char -> a
 scrabLetter x | myContains "aAeEiIlLnNoOrRsStTuU" x = 1
               | myContains "dDgG" x = 2
               | myContains "bBcCmMpP" x = 3
@@ -138,7 +142,9 @@ mergeComp f (x:xrest) (y:yrest) | otherwise =
 \noindent \texttt{intersperse} takes an element and a list of the same type and returns a list
 where the provided element is inserted between each of the original elements. 
 If the list is empty or only has one element this means the returned list will
-be the same as the given list.
+be the same as the given list. It works by placing the given element in front
+of every element aside from the first element. foldr is used which maintains ordering
+and allows the function to terminate even on empty lists. 
 
 \begin{code}
 intersperse :: a -> [a] -> [a]
